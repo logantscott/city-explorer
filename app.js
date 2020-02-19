@@ -3,12 +3,18 @@ const app = express();
 const geoData = require('./data/geo.json');
 const weather = require('./data/darksky.json');
 const cors = require('cors');
+const request = require('superagent');
+
+const geoKey = process.env.geoAPIKey;
 
 let lat;
 let lng;
 
 app.use(cors());
-
+app.use((req, res, next) => {
+    req.headers['lol'] = 'new request header lol';
+    next();
+});
 
 app.get('/', (req, res) => {
     res.json({
@@ -30,20 +36,31 @@ app.get('/weather', (req, res) => {
     res.json(queryWeather);
 });
 
-app.get('/location', (req, res) => {
-    const location = req.query.search;
+app.get('/location', async(req, res, next) => {
+    try {
+        const location = req.query.search;
 
-    const cityData = geoData.results[0];
+        console.log(location)
 
-    lat = cityData.geometry.location.lat;
-    lng = cityData.geometry.location.lng;
+        const URL = `https://us1.locationiq.com/v1/search.php?key=${geoKey}&q=${location}&format=json`;
 
-    res.json({
-        search_query: location,
-        formatted_query: cityData.formatted_address,
-        latitude: lat,
-        longitude: lng
-    });
+        console.log(URL);
+
+        const locationData = await request.get(URL);
+        const firstResult = locationData.body[0];
+
+        lat = firstResult.lat;
+        lng = firstResult.lon;
+
+        res.json({
+            search_query: location,
+            formatted_query: firstResult.display_name,
+            latitude: lat,
+            longitude: lng
+        });
+    } catch (err) {
+        next(err);
+    }
 });
 
 app.get('*', (req, res) => {
