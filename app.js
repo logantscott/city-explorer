@@ -5,7 +5,7 @@ const weather = require('./data/darksky.json');
 const cors = require('cors');
 const request = require('superagent');
 
-const geoKey = process.env.geoAPIKey;
+const GEOCODE_API_KEY = process.env.geoAPIKey;
 
 let lat;
 let lng;
@@ -40,11 +40,7 @@ app.get('/location', async(req, res, next) => {
     try {
         const location = req.query.search;
 
-        console.log(location)
-
-        const URL = `https://us1.locationiq.com/v1/search.php?key=${geoKey}&q=${location}&format=json`;
-
-        console.log(URL);
+        const URL = `https://us1.locationiq.com/v1/search.php?key=${GEOCODE_API_KEY}&q=${location}&format=json`;
 
         const locationData = await request.get(URL);
         const firstResult = locationData.body[0];
