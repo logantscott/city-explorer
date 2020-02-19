@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const geoData = require('./data/geo.json');
+const weather = require('./data/darksky.json');
 const cors = require('cors');
 
 
@@ -13,12 +14,18 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/weather/:forecast/:time', (req, res) => {
-    res.json({
-        some: 'json',
-        forecast: req.params.forecast,
-        time: req.params.time
+const getWeatherData = (lat, lng) => {
+    return weather.daily.data.map(forecast => {
+        return {
+            time: new Date(forecast.time),
+            forecast: forecast.summary
+        };
     });
+};
+
+app.get('/weather', (req, res) => {
+    const queryWeather = getWeatherData(req.query.latitude, req.query.longitude);
+    res.json(queryWeather);
 });
 
 app.get('/location', (req, res) => {
