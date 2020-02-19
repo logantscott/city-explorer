@@ -1,12 +1,10 @@
 const express = require('express');
-
 const app = express();
-
 const geoData = require('./data/geo.json');
+const cors = require('cors');
 
 
-
-
+app.use(cors());
 
 
 app.get('/', (req, res) => {
