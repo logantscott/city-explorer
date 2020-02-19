@@ -6,6 +6,7 @@ const cors = require('cors');
 const request = require('superagent');
 
 const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
+const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 
 let lat;
 let lng;
@@ -22,19 +23,22 @@ app.get('/', (req, res) => {
     });
 });
 
-const getWeatherData = (lat, lng) => {
-    return weather.daily.data.map(forecast => {
+const getWeatherData = async(lat, lng) => {
+
+    const URL = `https://api.darksky.net/forecast/${WEATHER_API_KEY}/${lat},${lng}`;
+
+    const weatherData = await request.get(URL);
+    const dailyWeather = weatherData.body.daily;
+
+    // console.log(dailyWeather);
+
+    return dailyWeather.data.map(forecast => {
         return {
             time: new Date(forecast.time * 1000),
             forecast: forecast.summary
         };
     });
 };
-
-app.get('/weather', (req, res) => {
-    const queryWeather = getWeatherData(req.query.latitude, req.query.longitude);
-    res.json(queryWeather);
-});
 
 app.get('/location', async(req, res, next) => {
     try {
@@ -54,6 +58,15 @@ app.get('/location', async(req, res, next) => {
             latitude: lat,
             longitude: lng
         });
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.get('/weather', async(req, res, next) => {
+    try {
+        const queryWeather = await getWeatherData(lat, lng);
+        res.json(queryWeather);
     } catch (err) {
         next(err);
     }
