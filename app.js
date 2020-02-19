@@ -1,12 +1,11 @@
 const express = require('express');
 const app = express();
-const geoData = require('./data/geo.json');
-const weather = require('./data/darksky.json');
 const cors = require('cors');
 const request = require('superagent');
 
 const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const YELP_API_KEY = process.env.YELP_API_KEY;
 
 let lat;
 let lng;
@@ -36,6 +35,26 @@ const getWeatherData = async(lat, lng) => {
         return {
             time: new Date(forecast.time * 1000),
             forecast: forecast.summary
+        };
+    });
+};
+
+const getYelpData = async(lat, lng) => {
+
+    const URL = `https://api.yelp.com/v3/businesses/search?latitude=${lat}&longitude=${lng}`;
+
+    const yelpData = await request
+        .get(URL)
+        .set('Authorization', `Bearer ${YELP_API_KEY}`);
+    const yelpResults = yelpData.body;
+
+    return yelpResults.businesses.map(business => {
+        return {
+            name: business.name,
+            image_url: business.image_url,
+            price: business.price,
+            rating: business.rating,
+            url: business.url
         };
     });
 };
@@ -72,40 +91,22 @@ app.get('/weather', async(req, res, next) => {
     }
 });
 
+app.get('/yelp', async(req, res, next) => {
+    try {
+        const yelpData = await getYelpData(lat, lng);
+        // .set('Accept', 'application/json')
+        res.json(yelpData);
+    } catch (err) {
+        next(err);
+    }
+});
+
 app.get('*', (req, res) => {
     res.json({
         ohNo: '404'
     });
 });
 
-
-// Helper Functions
-function getLatLng(location) {
-    // simulate an error if special "bad location" is provided:
-    if(location === 'bad location') {
-        throw new Error();
-    }
-
-    // ignore location for now, return hard-coded file
-    // api call will go here
-
-    // convert to desired data format:
-    return toLocation(geoData);
-}
-
-function toLocation(/*geoData*/) {
-    const firstResult = geoData.results[0];
-    const geometry = firstResult.geometry;
-    
-    return {
-        formatted_query: firstResult.formatted_address,
-        latitude: geometry.location.lat,
-        longitude: geometry.location.lng
-    };
-}
-
 module.exports = {
-    app: app,
-    toLocation: toLocation,
-    getLatLng: getLatLng
+    app: app
 };
