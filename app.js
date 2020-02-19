@@ -5,7 +5,7 @@ const weather = require('./data/darksky.json');
 const cors = require('cors');
 const request = require('superagent');
 
-const GEOCODE_API_KEY = process.env.geoAPIKey;
+const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
 
 let lat;
 let lng;
