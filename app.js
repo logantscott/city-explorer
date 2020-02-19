@@ -4,6 +4,8 @@ const geoData = require('./data/geo.json');
 const weather = require('./data/darksky.json');
 const cors = require('cors');
 
+let lat;
+let lng;
 
 app.use(cors());
 
@@ -17,7 +19,7 @@ app.get('/', (req, res) => {
 const getWeatherData = (lat, lng) => {
     return weather.daily.data.map(forecast => {
         return {
-            time: new Date(forecast.time),
+            time: new Date(forecast.time * 1000),
             forecast: forecast.summary
         };
     });
@@ -29,12 +31,18 @@ app.get('/weather', (req, res) => {
 });
 
 app.get('/location', (req, res) => {
+    const location = req.query.search;
+
     const cityData = geoData.results[0];
+
+    lat = cityData.geometry.location.lat;
+    lng = cityData.geometry.location.lng;
+
     res.json({
-        search_query: 'portland',
+        search_query: location,
         formatted_query: cityData.formatted_address,
-        latitude: cityData.geometry.location.lat,
-        longitude: cityData.geometry.location.lng
+        latitude: lat,
+        longitude: lng
     });
 });
 
