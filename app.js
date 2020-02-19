@@ -91,7 +91,7 @@ app.get('/weather', async(req, res, next) => {
     }
 });
 
-app.get('/yelp', async(req, res, next) => {
+app.get('/reviews', async(req, res, next) => {
     try {
         const yelpData = await getYelpData(lat, lng);
         // .set('Accept', 'application/json')
