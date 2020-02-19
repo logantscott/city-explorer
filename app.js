@@ -1,11 +1,27 @@
 const express = require('express');
-require('dotenv').config();
+
 
 const app = express();
 
-app.get('/location/', (req, res) => {
+app.get('/', (req, res) => {
     res.json({
-        some: 'json'
+        welcome: 'home'
+    });
+});
+
+app.get('/weather/:forecast/:time', (req, res) => {
+    res.json({
+        some: 'json',
+        forecast: req.params.forecast,
+        time: req.params.time
+    });
+});
+
+app.get('/location/:lat/:long', (req, res) => {
+    res.json({
+        some: 'json',
+        latitude: req.params.lat,
+        longitude: req.params.long
     });
 });
 
@@ -15,6 +31,6 @@ app.get('*', (req, res) => {
     });
 });
 
-let port = process.env.PORT;
-
-app.listen(port, () => { console.log(`Listening to port ${port} . . .`);});
+module.exports = {
+    app: app
+};
