@@ -4,11 +4,11 @@ const app = express();
 const cors = require('cors');
 const request = require('superagent');
 
-const { GEOCODE_API_KEY,
-    WEATHER_API_KEY,
-    YELP_API_KEY,
-    TRAIL_API_KEY,
-    EVENT_API_KEY } = process.env;
+// const { GEOCODE_API_KEY,
+//     WEATHER_API_KEY,
+//     YELP_API_KEY,
+//     TRAIL_API_KEY,
+//     EVENT_API_KEY } = process.env;
 
 let lat;
 let lng;
