@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const cors = require('cors');
@@ -54,7 +55,7 @@ const getEventData = async(lat, lng) => {
         return {
             link: event.url,
             name: event.title,
-            event_date: event.end_time,
+            event_date: event.start_time,
             summary: event.description === null ? 'N/A' : event.description
         };
     });
@@ -108,7 +109,7 @@ app.get('/location', async(req, res, next) => {
         const location = req.query.search;
 
         const URL = `https://us1.locationiq.com/v1/search.php?key=${GEOCODE_API_KEY}&q=${location}&format=json`;
-
+        console.log(URL);
         const locationData = await request.get(URL);
         const firstResult = locationData.body[0];
 
