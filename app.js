@@ -6,6 +6,7 @@ const request = require('superagent');
 const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const YELP_API_KEY = process.env.YELP_API_KEY;
+const TRAIL_API_KEY = process.env.TRAIL_API_KEY;
 
 let lat;
 let lng;
@@ -59,6 +60,29 @@ const getYelpData = async(lat, lng) => {
     });
 };
 
+const getTrailData = async(lat, lng) => {
+
+    const URL = `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lng}&maxDistance=10&key=${TRAIL_API_KEY}`;
+
+    const trailData = await request.get(URL);
+    const nearbyTrails = trailData.body;
+
+    return nearbyTrails.trails.map(trail => {
+        return {
+            'name': trail.name,
+            'location': trail.location,
+            'length': trail.length,
+            'stars': trail.stars,
+            'star_votes': trail.starVotes,
+            'summary': trail.summary,
+            'trail_url': trail.url,
+            'conditions': trail.conditionDetails === null ? trail.conditionStatus : trail.conditionDetails,
+            'condition_date': trail.conditionDate.split(' ')[0],
+            'condition_time': trail.conditionDate.split(' ')[1]
+        };
+    });
+};
+
 app.get('/location', async(req, res, next) => {
     try {
         const location = req.query.search;
@@ -96,6 +120,16 @@ app.get('/reviews', async(req, res, next) => {
         const yelpData = await getYelpData(lat, lng);
         // .set('Accept', 'application/json')
         res.json(yelpData);
+    } catch (err) {
+        next(err);
+    }
+});
+
+app.get('/trails', async(req, res, next) => {
+    try {
+        const trailData = await getTrailData(lat, lng);
+        // .set('Accept', 'application/json')
+        res.json(trailData);
     } catch (err) {
         next(err);
     }
