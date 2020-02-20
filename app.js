@@ -1,8 +1,8 @@
-require('dotenv').config();
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const request = require('superagent');
+// require('dotenv').config();
+// const express = require('express');
+// const app = express();
+// const cors = require('cors');
+// const request = require('superagent');
 
 // const { GEOCODE_API_KEY,
 //     WEATHER_API_KEY,
