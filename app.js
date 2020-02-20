@@ -7,6 +7,7 @@ const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
 const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
 const YELP_API_KEY = process.env.YELP_API_KEY;
 const TRAIL_API_KEY = process.env.TRAIL_API_KEY;
+const EVENT_API_KEY = process.env.EVENT_API_KEY;
 
 let lat;
 let lng;
@@ -36,6 +37,25 @@ const getWeatherData = async(lat, lng) => {
         return {
             time: new Date(forecast.time * 1000),
             forecast: forecast.summary
+        };
+    });
+};
+
+const getEventData = async(lat, lng) => {
+
+    const URL = `http://api.eventful.com/json/events/search?app_key=${EVENT_API_KEY}&where=${lat},${lng}&within=25&page_size=20&page_number=1`;
+
+    const eventData = await request.get(URL);
+
+    //JSON.parse(data.text) instead of data.body
+    const nearbyEvents = JSON.parse(eventData.text);
+
+    return nearbyEvents.events.event.map(event => {
+        return {
+            link: event.url,
+            name: event.title,
+            event_date: event.end_time,
+            summary: event.description === null ? 'N/A' : event.description
         };
     });
 };
@@ -115,10 +135,20 @@ app.get('/weather', async(req, res, next) => {
     }
 });
 
+app.get('/events', async(req, res, next) => {
+    try {
+        const eventData = await getEventData(lat, lng);
+        
+        res.json(eventData);
+    } catch (err) {
+        next(err);
+    }
+});
+
 app.get('/reviews', async(req, res, next) => {
     try {
         const yelpData = await getYelpData(lat, lng);
-        // .set('Accept', 'application/json')
+        
         res.json(yelpData);
     } catch (err) {
         next(err);
@@ -128,7 +158,7 @@ app.get('/reviews', async(req, res, next) => {
 app.get('/trails', async(req, res, next) => {
     try {
         const trailData = await getTrailData(lat, lng);
-        // .set('Accept', 'application/json')
+        
         res.json(trailData);
     } catch (err) {
         next(err);
